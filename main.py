@@ -1,3 +1,4 @@
+import time
 import json
 
 import keyboard
@@ -8,6 +9,9 @@ import keyboard
 {'ctrl', 'shift', 'windows', 'alt'}
 
 https://github.com/boppreh/keyboard
+
+
+going to make a list of all the buttons that have been pressed and then send that as a combination ?
 """
 
 class OneHandedKeyboard:
@@ -15,41 +19,50 @@ class OneHandedKeyboard:
     def __init__(self):
         with open('remaps.json','r') as self.remaps:
             self.config = json.load(self.remaps)
-        self.escape_key = 'esc'
         self.modifier_key = self.config['modifier']
+        self.modifying = False
         self.remap_keys = self.config['key_maps']
-        self.modifier = False
-        self.shifting = False
         self.key_states = {"down": True, "up": False}
+        self.pressed_modifiers = []
+        self.pressed_key = None
+        self.all_modifiers = keyboard.all_modifiers
+        self.debounce = False
         keyboard.hook(self.modifier_callback, suppress=True)
-        keyboard.wait('esc')
+        keyboard.wait()
 
     def modifier_callback(self, kb_event):
         if kb_event.name == self.modifier_key:
-            self.modifier = self.key_states[kb_event.event_type]
-            print(f"Modifier key {kb_event.event_type}")
-            return
-        if kb_event.name.count("shift") > 0:
-            self.shifting = self.key_states[kb_event.event_type]
-            print(f"Shift key {kb_event.event_type}")
-            return
-        if self.modifier and kb_event.name in self.remap_keys:
-            if kb_event.event_type == "down":
-                print(f"Modifier active: Changing {kb_event.name} into {self.remap_keys[kb_event.name]}")
-                if self.shifting:
-                    print("shift", self.remap_keys[kb_event.name].upper())
-                    keyboard.send("shift+" + self.remap_keys[kb_event.name])
-                else:
-                    keyboard.send(self.remap_keys[kb_event.name])
+            self.modifying = self.key_states[kb_event.event_type]
         else:
-            if kb_event.event_type == "down":
-                print(kb_event.to_json())
-                if self.shifting:
-                    print("shift", kb_event.name)
-                    keyboard.send("shift+" + kb_event.name)
+            if kb_event.name in self.all_modifiers and kb_event.name not in self.pressed_modifiers and kb_event.event_type == "down":
+                self.pressed_modifiers.append(kb_event.name)
+            elif kb_event.name in self.all_modifiers and kb_event.name in self.pressed_modifiers and kb_event.event_type == "up":
+                self.pressed_modifiers.remove(kb_event.name)
+            else:
+                if kb_event.event_type == "down":
+                    self.pressed_key = kb_event.name
+                elif kb_event.event_type == "up" and self.pressed_key == kb_event.name:
+                    self.pressed_key = None
+
+        if self.pressed_modifiers and kb_event.event_type == "down":
+            send_keys = '+'.join(self.pressed_modifiers)
+            if self.pressed_key:
+                if self.modifying and self.pressed_key in self.remap_keys:
+                    send_keys += "+" + self.remap_keys[self.pressed_key]
                 else:
-                    keyboard.send(kb_event.name)
+                    send_keys += "+" + self.pressed_key
+            # print(send_keys)
+            keyboard.send(send_keys)
+        elif self.pressed_key and kb_event.event_type == "down":
+            if self.modifying and self.pressed_key in self.remap_keys:
+                keyboard.send(self.remap_keys[self.pressed_key])
+            else:
+                keyboard.send(self.pressed_key)
+        # print("modifying", self.modifying)
+        # print("pressed_key", self.pressed_key)
+        # print("pressed_modifiers", self.pressed_modifiers)
+        # time.sleep(.06)
 
 if __name__ == "__main__":
-    ohk = OneHandedKeyboard()
     print(keyboard.all_modifiers)
+    ohk = OneHandedKeyboard()
