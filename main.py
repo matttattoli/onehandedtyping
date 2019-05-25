@@ -23,7 +23,7 @@ class OneHandedKeyboard:
                 if self.modifying and kb_event.name in self.remap_keys:
                     keyboard.press(self.remap_keys[kb_event.name])
                 else:
-                    keyboard.press(kb_event.name)
+                    keyboard.press(kb_event.name.lower())
             elif kb_event.event_type == "up":
                 keyboard.release(kb_event.name)
                 if kb_event.name in self.remap_keys:
