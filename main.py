@@ -12,7 +12,7 @@ class OneHandedKeyboard:
         self.modifying = False
         self.remap_keys = self.config['key_maps']
         self.key_states = {"down": True, "up": False}
-        keyboard.hook(self.modifier_callback, suppress=True)
+        self.hook_keys()
         keyboard.wait()
 
     def modifier_callback(self, kb_event):
@@ -31,6 +31,13 @@ class OneHandedKeyboard:
             keyboard.release(kb_event.name)
             if kb_event.name in self.remap_keys:
                 keyboard.release(self.remap_keys[kb_event.name])
+
+    def hook_keys(self):
+        for key in self.remap_keys.keys():
+            keyboard.hook_key(key, self.key_callback, suppress=True)
+        keyboard.hook_key(self.modifier_key,
+                          self.modifier_callback,
+                          suppress=True)
 
 
 if __name__ == "__main__":
