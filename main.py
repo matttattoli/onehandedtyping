@@ -18,18 +18,19 @@ class OneHandedKeyboard:
     def modifier_callback(self, kb_event):
         if kb_event.name == self.modifier_key:
             self.modifying = self.key_states[kb_event.event_type]
-        else:
-            if keyboard.is_pressed('shift'):
-                kb_event.name = kb_event.name.lower()
-            if kb_event.event_type == "down":
-                if self.modifying and kb_event.name in self.remap_keys:
-                    keyboard.press(self.remap_keys[kb_event.name])
-                else:
-                    keyboard.press(kb_event.name)
-            elif kb_event.event_type == "up":
-                keyboard.release(kb_event.name)
-                if kb_event.name in self.remap_keys:
-                    keyboard.release(self.remap_keys[kb_event.name])
+
+    def key_callback(self, kb_event):
+        if keyboard.is_pressed('shift'):
+            kb_event.name = kb_event.name.lower()
+        if kb_event.event_type == "down":
+            if self.modifying and kb_event.name in self.remap_keys:
+                keyboard.press(self.remap_keys[kb_event.name])
+            else:
+                keyboard.press(kb_event.name)
+        elif kb_event.event_type == "up":
+            keyboard.release(kb_event.name)
+            if kb_event.name in self.remap_keys:
+                keyboard.release(self.remap_keys[kb_event.name])
 
 
 if __name__ == "__main__":
