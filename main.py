@@ -1,6 +1,9 @@
 import json
 
 import keyboard
+from win32api import GetKeyState  # pylint: disable=no-name-in-module
+from win32con import VK_CAPITAL
+import os
 
 
 def get_remap_config():
@@ -10,6 +13,12 @@ def get_remap_config():
     with open(config_path, 'r') as remaps:
         config = json.load(remaps)
     return config
+
+
+def deactivate_capslock():
+    if GetKeyState(VK_CAPITAL) == 1:
+        keyboard.press('capslock')
+
 
 class OneHandedKeyboard:
     def __init__(self):
@@ -21,15 +30,16 @@ class OneHandedKeyboard:
         keyboard.wait()
 
     def modifier_callback(self, kb_event):
-        if kb_event.name == self.modifier_key:
-            if self.modifying and kb_event.event_type == 'up':
-                self.unhook_keys()
-                self.modifying = False
-            elif not self.modifying and kb_event.event_type == 'down':
-                self.hook_keys()
-                self.modifying = True
+        deactivate_capslock()
+        if self.modifying and kb_event.event_type == 'up':
+            self.unhook_keys()
+            self.modifying = False
+        elif not self.modifying and kb_event.event_type == 'down':
+            self.hook_keys()
+            self.modifying = True
 
     def key_callback(self, kb_event):
+        deactivate_capslock()
         if keyboard.is_pressed('shift'):
             kb_event.name = kb_event.name.lower()
         if kb_event.event_type == "down":
