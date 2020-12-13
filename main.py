@@ -3,10 +3,17 @@ import json
 import keyboard
 
 
+def get_remap_config():
+    config_path = 'ohtremaps.json'
+    if os.path.exists(f"{os.getenv('USERPROFILE')}\\.ohtremaps.json"):
+        config_path = f"{os.getenv('USERPROFILE')}\\.ohtremaps.json"
+    with open(config_path, 'r') as remaps:
+        config = json.load(remaps)
+    return config
+
 class OneHandedKeyboard:
     def __init__(self):
-        with open('remaps.json', 'r') as self.remaps:
-            self.config = json.load(self.remaps)
+        self.config = get_remap_config()
         self.modifier_key = self.config['modifier']
         self.modifying = False
         self.remap_keys = self.config['key_maps']
