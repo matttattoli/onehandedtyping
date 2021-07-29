@@ -16,7 +16,7 @@ def get_remap_config():
 
 
 def deactivate_capslock():
-    if GetKeyState(VK_CAPITAL) == 1:
+    if GetKeyState(VK_CAPITAL) == -127 or GetKeyState(VK_CAPITAL) == 1:
         keyboard.press('capslock')
 
 
