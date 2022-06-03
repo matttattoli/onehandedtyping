@@ -3,6 +3,7 @@ import json
 import keyboard
 from win32api import GetKeyState  # pylint: disable=no-name-in-module
 from win32con import VK_CAPITAL
+from win32com import client as comclient
 import os
 
 
@@ -17,7 +18,8 @@ def get_remap_config():
 
 def deactivate_capslock():
     if GetKeyState(VK_CAPITAL) == -127 or GetKeyState(VK_CAPITAL) == 1:
-        keyboard.press('capslock')
+        wsh = comclient.Dispatch('WScript.Shell')
+        wsh.SendKeys('{CAPSLOCK}')
 
 
 class OneHandedKeyboard:
