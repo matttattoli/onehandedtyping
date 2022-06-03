@@ -1,10 +1,10 @@
 import json
+import os
 
 import keyboard
 from win32api import GetKeyState  # pylint: disable=no-name-in-module
-from win32con import VK_CAPITAL
 from win32com import client as comclient
-import os
+from win32con import VK_CAPITAL
 
 
 def get_remap_config():
