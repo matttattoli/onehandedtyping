@@ -42,17 +42,22 @@ class OneHandedKeyboard:
 
     def key_callback(self, kb_event):
         deactivate_capslock()
-        if keyboard.is_pressed('shift'):
-            kb_event.name = kb_event.name.lower()
+        mapping = kb_event.name
+        if keyboard.is_pressed("shift"):
+            mapping = (
+                kb_event.name
+                if kb_event.name in self.remap_keys
+                else kb_event.name.lower()
+            )
         if kb_event.event_type == "down":
-            if self.modifying and kb_event.name in self.remap_keys:
-                keyboard.press(self.remap_keys[kb_event.name])
+            if self.modifying and mapping in self.remap_keys:
+                keyboard.press(self.remap_keys[mapping])
             else:
                 keyboard.press(kb_event.name)
         elif kb_event.event_type == "up":
             keyboard.release(kb_event.name)
-            if kb_event.name in self.remap_keys:
-                keyboard.release(self.remap_keys[kb_event.name])
+            if mapping in self.remap_keys:
+                keyboard.release(self.remap_keys[mapping])
 
     def hook_keys(self):
         for key in self.remap_keys.keys():
